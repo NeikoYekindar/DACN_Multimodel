@@ -26,7 +26,7 @@ class ImageProcessor:
         lab = cv2.cvtColor(resized_img, cv2.COLOR_BGR2LAB)
         l, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        cl = clahe.apply(1)
+        cl = clahe.apply(l)
         enhanced_lab = cv2.merge((cl, a, b))
         enhanced_img = cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2BGR)
 
@@ -69,8 +69,8 @@ class WaterSegmentationModel:
 
 
         # Tham chiếu diện tích an toàn (có thể điều chỉnh)
-        self.reference_camera_area = 10000    # Diện tích mặc định, sẽ được cập nhật
-        self.reference_drone_area = 15000  # Diện tích mặc định, sẽ được cập nhật
+        self.reference_camera_area = 214139    # Diện tích mặc định, sẽ được cập nhật 214139 
+        self.reference_drone_area = 114114 # Diện tích mặc định, sẽ được cập nhật 114114
 
 
 
@@ -142,7 +142,7 @@ class WaterSegmentationModel:
         # tránh trường hợp chia cho 0
         delta_camera_abs = abs(delta_camera)
         delta_drone_abs = abs(delta_drone)
-        
+        return delta_camera_abs, delta_drone_abs
 
 
 
@@ -159,6 +159,7 @@ class FusionNetwork(nn.Module):
         x = self.fc1(x)  # Biến đổi đặc trưng đầu vào
         x = self.relu(x)  # Áp dụng hàm kích hoạt ReLU
         x = self.fc2(x)  # Biến đổi đặc trưng lần hai
+        print("Before sigmoid:", x)
         x = self.sigmoid(x)  # Chuẩn hóa đầu ra
         return x
     
@@ -168,15 +169,16 @@ class WeightedFusion:
         Khởi tạo mạng Fusion Network để kết hợp đặc trưng từ camera và drone
         """
         self.fusion_network = FusionNetwork(input_size=2, hidden_size=128).to(device)
+        self.camera_only_net = CameraOnlyNetwork().to(device)
         #khởi tạo bộ tối ưu hóa
         self.optimizer = optim.Adam(self.fusion_network.parameters(), lr=0.001)
         self.criterion = nn.BCELoss()
 
     def calculate_weights(self, delta_camera, delta_drone):
-        # Tính trọng số ban đầu
+       
         w_camera_prime = 1 / (1+delta_camera)
         w_drone_prime = 1 / (1+delta_drone)
-        # Chuẩn hóa để đảm báo tổng trọng số bằng 1
+        
         w_camera = w_camera_prime / (w_camera_prime + w_drone_prime)
         w_drone = w_drone_prime / (w_camera_prime + w_drone_prime)
         
@@ -202,17 +204,57 @@ class WeightedFusion:
         drone_feature = extract_water_area_feature(result_drone)
 
         return camera_feature, drone_feature
+    def extract_feature_camera(self, camera_image, camera_model):
+        result_camera = camera_model(camera_image)
+        def extract_water_area_feature(results):
+            masks = results[0].masks
+            if masks is None:
+                return torch.tensor([0.0], dtype=torch.float32).to(device)
+            mask_data = masks.data.cpu().numpy()
+            water_area_per_obj = np.sum(mask_data, axis=(1, 2))
+            total_water_area = np.sum(water_area_per_obj)
+            return torch.tensor([total_water_area], dtype=torch.float32).to(device)
+        camera_feature = extract_water_area_feature(result_camera)
+        return camera_feature
+
     def fuse_features(self, camera_feature, drone_feature, w_camera, w_drone):
         # Tính tổng có trọng số (weighted sum)
-        weighted_sum = w_camera * camera_feature + w_drone * drone_feature
-        fused_features = torch.cat([camera_feature.unsqueeze(0), drone_feature.unsqueeze(0)], dim=1)
+        # weighted_sum = w_camera * camera_feature + w_drone * drone_feature
+        fused_features = torch.cat([
+            (w_camera * camera_feature).unsqueeze(0),
+            (w_drone * drone_feature).unsqueeze(0)
+        ], dim=1)
+        #fused_features = torch.cat([camera_feature.unsqueeze(0), drone_feature.unsqueeze(0)], dim=1)
         return fused_features
+    
     def predict_flood_risk(self, fused_features):
         self.fusion_network.eval()
         with torch.no_grad():
             risk_score = self.fusion_network(fused_features)
 
         return risk_score.item()
+    def predict_camera_only_risk(self, camera_feature):
+        self.camera_only_net.eval()
+        with torch.no_grad():
+            risk_score = self.camera_only_net(camera_feature)
+        return risk_score.item()
+
+
+
+class CameraOnlyNetwork(nn.Module):
+    def __init__(self):
+        super(CameraOnlyNetwork, self).__init__()
+        self.fc1 = nn.Linear(1, 64)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(64, 1)
+        self.sigmoid = nn.Sigmoid()
+    
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.sigmoid(x)
+        return x
     
 class FloodWarningSystem:
     def __init__(self, risk_threshold = 0.65):
@@ -260,61 +302,144 @@ class FloodWarningSystem:
         
         # Chuyển đổi figure thành hình ảnh
         fig.canvas.draw()
-        visualization = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-        visualization = visualization.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        visualization = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
+        visualization = visualization.reshape(fig.canvas.get_width_height()[::-1] + (4,))
+        visualization = visualization[:, :, 1:]
         
         plt.close(fig)
         
         return visualization
 
-def main():
-    camera_model_path = "path/to/camera_model.pt"
-    drone_model_path = "path/to/drone_model.pt"
 
-    camera_image_path = "path/to/camera_image.jpg"
-    drone_image_path = "path/to/drone_image.jpg"
+def visualize_detected_images(camera_image, drone_image, water_mask_camera, water_mask_drone):
+    """
+    Hiển thị và kết hợp ảnh gốc với mặt nạ vùng nước.
+    Args:
+        camera_image: Ảnh từ camera.
+        drone_image: Ảnh từ drone.
+        water_mask_camera: Mặt nạ vùng nước từ camera.
+        water_mask_drone: Mặt nạ vùng nước từ drone.
+    Returns:
+        camera_detected: Ảnh camera kèm mặt nạ vùng nước.
+        drone_detected: Ảnh drone kèm mặt nạ vùng nước.
+    """
+    colored_mask_camera = np.zeros_like(camera_image)
+    colored_mask_camera[water_mask_camera > 0] = (0, 255, 255) 
+    color_mask_drone = np.zeros_like(drone_image)
+    color_mask_drone[water_mask_drone>0] =  (0, 255, 255)
+
+
+    # Kết hợp ảnh gốc với mặt nạ vùng nước
+    # camera_detected = cv2.addWeighted(camera_image, 0.7, cv2.cvtColor(water_mask_camera, cv2.COLOR_GRAY2BGR), 0.3, 0)
+    # drone_detected = cv2.addWeighted(drone_image, 0.7, cv2.cvtColor(water_mask_drone, cv2.COLOR_GRAY2BGR), 0.3, 0)
+    camera_detected = cv2.addWeighted(camera_image, 0.7, colored_mask_camera, 0.3, 0)
+    drone_detected = cv2.addWeighted(drone_image, 0.7, color_mask_drone, 0.3, 0)
+
+    # Hiển thị kết quả
+    cv2.imshow("Detected Camera Image", camera_detected)
+    cv2.imshow("Detected Drone Image", drone_detected)
+
+    # Đợi người dùng nhấn phím để đóng cửa sổ
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    return camera_detected, drone_detected
+
+
+
+
+def main():
+    camera_model_path = "E:/DACN/Curent_model/camera_model.pt"
+    drone_model_path = "runs/segment/train2/weights/best.pt"
+
+    camera_image_path = "E:/DACN/kenh_new.jpg"
+    drone_image_path = "E:/DACN/9536 (1)2.jpg"
+
+
+
+    use_drone = os.path.exists(drone_image_path)
+
+
 
     image_processor = ImageProcessor()
+
+
+
+    
     water_segmentation_model = WaterSegmentationModel(camera_model_path, drone_model_path)
     weight_fusion = WeightedFusion()
-    warning_system = FloodWarningSystem(risk_threshold=0.65)
+    warning_system = FloodWarningSystem(risk_threshold=0.5)
 
     #xử lý hình ảnh
     camera_image = image_processor.load_image(camera_image_path)
-    drone_image = image_processor.load_image(drone_image_path)
-
+    assert camera_image is not None, "Không thể đọc ảnh từ camera"
+   
     camera_image = image_processor.preprocess_image(camera_image)
-    drone_image = image_processor.preprocess_image(drone_image)
-
+    
     # phân đoạn vùng nước
+    #camera_mask, camera_area, camera_percentage = water_segmentation_model.segment_water(camera_image)
     camera_mask, camera_area, camera_percentage = water_segmentation_model.segment_water(camera_image)
-    drone_mask, drone_area, drone_percentage = water_segmentation_model.segment_water(drone_image, is_drone=True)
+    print(f"Diện tích vùng nước từ camera: {camera_area}, Phần trăm: {camera_percentage:.2f}%")
 
-    # tính sự thay đổi diện tích nước
-    delta_camera, delta_drone = water_segmentation_model.calculate_area_change(camera_area, drone_area)
 
-    # tính trọng só
-    w_camera, w_drone = weight_fusion.calculate_weights(delta_camera, delta_drone)
 
-    # Trích xuất đặc trưng
-    camera_feature, drone_feature = weight_fusion.extract_features(camera_image, drone_image, water_segmentation_model.camera_model, water_segmentation_model.drone_model)
+    if use_drone:
 
-    # Kết hợp đặc trưng
-    fused_features = weight_fusion.fuse_features(camera_feature, drone_feature, w_camera, w_drone)
+        drone_image = image_processor.load_image(drone_image_path)
+        assert drone_image is not None, "Không thể đọc ảnh từ drone"
+        print("Ảnh đã được đọc thành công!")
+        drone_image = image_processor.preprocess_image(drone_image)
+        
+
+        drone_mask, drone_area, drone_percentage = water_segmentation_model.segment_water(drone_image, is_drone=True)
+        print(f"Diện tích vùng nước từ drone: {drone_area}, Phần trăm: {drone_percentage:.2f}%")
+        # tính sự thay đổi diện tích nước
+        delta_camera, delta_drone = water_segmentation_model.calculate_area_change(camera_area, drone_area)
+         # tính trọng só
+        w_camera, w_drone = weight_fusion.calculate_weights(delta_camera, delta_drone)
+        print(f"Trọng số vùng nước từ camera: {w_camera}")
+        print(f"Trọng số vùng nước từ drone: {w_drone}")
+        camera_feature, drone_feature = weight_fusion.extract_features(
+            camera_image, drone_image, 
+            water_segmentation_model.camera_model, 
+            water_segmentation_model.drone_model
+        )
+        print(f"Feature vùng nước từ camera: {camera_feature}")
+        print(f"Feature vùng nước từ drone: {drone_feature}")
+        # Kết hợp đặc trưng
+        fused_features = weight_fusion.fuse_features(camera_feature, drone_feature, w_camera, w_drone)
+        risk_score = weight_fusion.predict_flood_risk(fused_features)
+
+    else:
+        print("Không tìm thấy ảnh drone. Sử dụng dữ liệu từ camera để phân tích.")
+        camera_feature = weight_fusion.extract_feature_camera(camera_image, water_segmentation_model.camera_model)
+        print(f"Feature vùng nước từ camera: {camera_feature}")
+        fused_features = camera_feature
+        risk_score = weight_fusion.predict_camera_only_risk(fused_features)
+
+
     # Dự đoán điểm rủi ro ngập lụt
-    risk_score = weight_fusion.predict_flood_risk(fused_features)
+    #risk_score = weight_fusion.predict_flood_risk(fused_features)
     print(f"Nguy cơ lũ lụt: {risk_score:.2f}")
     # Tạo cảnh báo
     alert, message = warning_system.generate_alert(risk_score)
     print(message)
-    # Trực quan hóa kết quả
+    if use_drone:
+        camera_detected, drone_detected = visualize_detected_images(
+            camera_image, drone_image, camera_mask, drone_mask
+        )
+    else:
+        colored_mask_camera = np.zeros_like(camera_image)
+        colored_mask_camera[camera_mask > 0] = (0, 255, 255) 
+        camera_detected = cv2.addWeighted(camera_image, 0.7, colored_mask_camera, 0.3, 0)
+        cv2.imshow("Detected Camera Image", camera_detected)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-    visualization = warning_system.visualize_alert(
-            camera_image, drone_image, camera_mask, drone_mask, 
-            alert, message, risk_score)
-
-    cv2.imwrite("./results/flood_detection_result.jpg", cv2.cvtColor(visualization, cv2.COLOR_RGB2BGR))
-    print("Kết quả đã được lưu tại ./results/flood_detection_result.jpg")
+    # cv2.imwrite("E:/DACN/detected_camera.jpg", camera_detected)
+    # cv2.imwrite("E:/DACN/detected_drone.jpg", drone_detected)
+    
+    # print("Kết quả đã được lưu tại E:/DACN/detected_camera.jpg và E:/DACN/detected_drone.jpg")
 
 if __name__ == "__main__":
     main()
