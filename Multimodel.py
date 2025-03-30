@@ -11,6 +11,8 @@ import torchvision.transforms as transforms
 import time
 import matplotlib.transforms as transforms
 import warnings
+import datetime
+
 warnings.filterwarnings("ignore")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -345,27 +347,42 @@ def visualize_detected_images(camera_image, drone_image, water_mask_camera, wate
 
     return camera_detected, drone_detected
 
+def is_drone_flying_now():
+    now = datetime.datetime.now().time()
+    morning = (datetime.time(6, 0), datetime.time(6, 10))
+    noon = (datetime.time(12, 0), datetime.time(12, 10))
+    afternoon = (datetime.time(17, 0), datetime.time(17, 10))
+
+    def in_range(t, time_range):
+        return time_range[0]<=t<=time_range[1]
+    return any(in_range(now, r) for r in [morning, noon, afternoon])
+
+def wait_for_drone_image(drone_image_path, timeout=30, interval=3):
+    print("Đang chờ ảnh từ drone ... ")
+    waited = 0
+    while waited < timeout:
+        if os.path.exists(drone_image_path):
+            print("Ảnh drone đã sẵn sàng!")
+            return True
+        time.sleep(interval)
+        waited += interval
+    return False
+
 
 
 
 def main():
+    drone_flying = True  # hoặc False tùy thời điểm thực tế
+    drone_flying = is_drone_flying_now()
+
     camera_model_path = "E:/DACN/Curent_model/camera_model.pt"
     drone_model_path = "runs/segment/train2/weights/best.pt"
 
     camera_image_path = "E:/DACN/kenh_new.jpg"
-    drone_image_path = "E:/DACN/9536 (1)2.jpg"
-
-
-
-    use_drone = os.path.exists(drone_image_path)
-
-
+    drone_image_path = "E:/DACN/9536 (1).jpg"
 
     image_processor = ImageProcessor()
 
-
-
-    
     water_segmentation_model = WaterSegmentationModel(camera_model_path, drone_model_path)
     weight_fusion = WeightedFusion()
     warning_system = FloodWarningSystem(risk_threshold=0.5)
@@ -383,8 +400,12 @@ def main():
 
 
 
-    if use_drone:
-
+    if drone_flying and os.path.exists(drone_image_path):
+        # if not wait_for_drone_image(drone_image_path):
+        #     raise FileNotFoundError("Drone đang bay nhưng không nhận được ảnh sau 30 giây!")
+        # Kiểm tra xem ảnh drone có tồn tại không (cẩn thận khi drone_flying = True nhưng chưa có ảnh)
+        # if not os.path.exists(drone_image_path):
+        #     raise FileNotFoundError("Drone đang bay nhưng chưa có ảnh đầu vào từ drone!")
         drone_image = image_processor.load_image(drone_image_path)
         assert drone_image is not None, "Không thể đọc ảnh từ drone"
         print("Ảnh đã được đọc thành công!")
@@ -424,10 +445,10 @@ def main():
     # Tạo cảnh báo
     alert, message = warning_system.generate_alert(risk_score)
     print(message)
-    if use_drone:
+    if drone_flying and os.path.exists(drone_image_path):
         camera_detected, drone_detected = visualize_detected_images(
             camera_image, drone_image, camera_mask, drone_mask
-        )
+    )
     else:
         colored_mask_camera = np.zeros_like(camera_image)
         colored_mask_camera[camera_mask > 0] = (0, 255, 255) 
