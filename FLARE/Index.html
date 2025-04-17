@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Flare Daskboard</title>
+        <link rel="stylesheet" href="style.css" />
+        <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet">
+
+    </head>
+    <body>
+        <header class="topbar">
+            <div class="topbar-title">Flare</div>
+        </header>
+        <div class="container">
+            <aside class="sidebar">
+                <!-- <div class="logo">FLare</div> -->
+                <nav class ="nav">
+                    <a href="#" class="active"   onclick="loadView('home')">Home</a>
+                    <a href="#" onclick="loadView('map')">Map</a>
+                    <a href="#">Data</a>
+                </nav>
+            </aside>
+            <div class="main-wrapper" id="main-content"></div>
+
+        </div>
+
+        <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.1/mapbox-gl.js"></script>
+        <script type="module" src="mapbox3d.js"></script>
+        <script src="view.js"></script>
+        <script type="module">
+            import { enable3D } from './mapbox3d.js';
+
+            mapboxgl.accessToken = 'pk.eyJ1IjoidGhpZW5waGF0MDgxMCIsImEiOiJjbTJzc3hrdzcwMTIwMm5weHliM2x1bXE0In0.-VE5I0KN9VglmKTWSxG97g';            
+        </script>
+    </body>
+</html>

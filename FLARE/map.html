@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flare Map Fullscreen</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      padding: 10px 16px;
+      background: white;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+  <div class="back-btn" onclick="history.back()">← Back</div>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
+  <script type="module">
+    import { enable3D } from './mapbox3d.js';
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoidGhpZW5waGF0MDgxMCIsImEiOiJjbTJzc3hrdzcwMTIwMm5weHliM2x1bXE0In0.-VE5I0KN9VglmKTWSxG97g';
+
+
+
+    map.on('load', () => {
+      enable3D(map);
+    });
+
+    map.addControl(new mapboxgl.NavigationControl());
+  </script>
+</body>
+</html>
