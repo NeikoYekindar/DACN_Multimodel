@@ -62,7 +62,7 @@ function loadView(view){
     if(view === "map"){
         container.innerHTML = `
 
-        <main class="main">
+        <main class="main_2">
             <div id = "map_2" class = "map-full"></div>
         </main>
         `;
