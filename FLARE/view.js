@@ -78,11 +78,11 @@ function loadView(view) {
                 <div class="info-content">
                     <div class="info">
                         <p class="state">State: </p>
-                        <p>Up</p>
+                        <p id="state_camera">Up</p>
                     </div>
                     <div class="info">
                         <p class="timestamp">Time stamp:</p>
-                        <p>2025-04-15 9:15:53</p>
+                        <p id="timestamp_camera">2025-04-15 9:15:53</p>
                     </div>
                 </div>
             </div>
@@ -95,15 +95,15 @@ function loadView(view) {
                 <div class="info-content">
                     <div class="info">
                         <p class="state">State: </p>
-                        <p>Up</p>
+                        <p id="state_drone">Up</p>
                     </div>
                     <div class="info">
                         <p class="battery">Battery: </p>
-                        <p>87%</p>
+                        <p id="battery_drone">87%</p>
                     </div>
                     <div class="info">
                         <p class="timestamp">Time stamp: </p>
-                        <p>2025-04-15 9:15:53</p>
+                        <p id="timestamp_drone">2025-04-15 9:15:53</p>
                     </div>
                 </div>
             </div>
@@ -115,11 +115,11 @@ function loadView(view) {
                 <div class="info-content">
                     <div class="info">
                         <p class="state">State: </p>
-                        <p>Up</p>
+                        <p id="state_pi">Up</p>
                     </div>
                     <div class="info">
                         <p class="timestamp">Time stamp: </p>
-                        <p>2025-04-15 9:15:53</p>
+                        <p id="timestamp_pi">2025-04-15 9:15:53</p>
                     </div>
                 </div>
             </div>
@@ -176,47 +176,79 @@ function initFullMap() {
     });
     map.on('load', () => {
         import('./mapbox3d.js').then(m => {
-            // Kích hoạt 3D
-            // m.enable3D(map);
-
-            // Thêm marker
-
             const locations = [
                 {
                     popup: 'Nhà văn hóa sinh viên',
                     longitude: 106.80131197919498,
                     latitude: 10.875352088818252,
-                    type: '1'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Up",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-19 9:15:53",
+                        drone_timestamp: "2025-04-19 9:15:53",
+                        pi_timestamp: "2025-04-19 9:15:53",
+                        battery_drone: "66%",
+                        warning: 1,
+                    }
                 },
                 {
                     popup: 'Cổng A - Trường Đại học Công nghệ thông tin',
                     longitude: 106.80212737116507,
                     latitude: 10.870716148648393,
-                    type: '0'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Down",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-18 9:15:53",
+                        drone_timestamp: "2025-04-18 9:15:53",
+                        pi_timestamp: "2025-04-18 9:15:53",
+                        battery_drone: "41%",
+                        warning: 0,
+                    }
                 },
                 {
                     popup: 'Ktx Khu B - ĐHQG',
                     longitude: 106.78378106209817,
                     latitude: 10.88222157674423,
-                    type: '1'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Up",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-20 9:15:53",
+                        drone_timestamp: "2025-04-20 9:15:53",
+                        pi_timestamp: "2025-04-20 9:15:53",
+                        battery_drone: "89%",
+                        warning: 0,
+                    }
                 },
                 {
                     popup: 'Trường Đại học KHXH&NV  ',
                     longitude: 106.80227757476617,
                     latitude: 10.872275518446761,
-                    type: '0'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Down",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-16 9:15:53",
+                        drone_timestamp: "2025-04-16 9:15:53",
+                        pi_timestamp: "2025-04-16 9:15:53",
+                        battery_drone: "67%",
+                        warning: 1,
+                    }
                 },
             ]
 
             locations.forEach((element, index) => {
                 var center = [element.longitude, element.latitude];
-                m.addCircleLayer(map, center, element.type, index);
+                m.addCircleLayer(map, center, element.station_data.warning, index);
 
                 const mark = m.addMarker(
                     map,
                     element.popup,
                     element.longitude,
                     element.latitude,
+                    element.station_data
                 );
             });
         });

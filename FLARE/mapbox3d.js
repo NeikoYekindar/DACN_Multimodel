@@ -32,7 +32,7 @@ function enable3D(map) {
 }
 
 //Thêm marker vào mapmap
-function addMarker(map, popupHtml = '', longitude, latitude) {
+function addMarker(map, popupHtml = '', longitude, latitude, { camera_state, drone_state, pi_state, camera_timestamp, drone_timestamp, pi_timestamp, battery_drone, warning }) {
 
     const customIcon = document.createElement('div');
     customIcon.className = 'custom-marker';
@@ -48,13 +48,56 @@ function addMarker(map, popupHtml = '', longitude, latitude) {
         const popup = new mapboxgl.Popup().setHTML(popupHtml);
         marker.setPopup(popup);
     }
+
     const popup = document.getElementById('station_detail');
 
     marker.getElement().addEventListener('click', () => {
-        popup.style.display = 'flex'
+
+        const updateAndShowPopup = () => {
+            const popupCameraState = document.getElementById('state_camera');
+            const popupDroneState = document.getElementById('state_drone');
+            const popupPiState = document.getElementById('state_pi');
+            const popupCameraTimestamp = document.getElementById('timestamp_camera');
+            const popupDroneTimestamp = document.getElementById('timestamp_drone');
+            const popupPiTimestamp = document.getElementById('timestamp_pi');
+            const popupPiBattery = document.getElementById('battery_drone');
+            const popupType = document.getElementById('type');
+
+            popupCameraState.innerHTML = camera_state;
+            popupDroneState.innerHTML = drone_state;
+            popupPiState.innerHTML = pi_state;
+            popupCameraTimestamp.innerHTML = camera_timestamp;
+            popupDroneTimestamp.innerHTML = drone_timestamp;
+            popupPiTimestamp.innerHTML = pi_timestamp;
+            popupPiBattery.innerHTML = battery_drone;
+            popupType.innerHTML = warning ? 'Flood risk' : 'Normal';
+            popupType.style.backgroundColor = warning ? 'red' : 'green';
+            popupType.style.borderColor = warning ? 'red' : 'green';
+            popupType.style.color = 'white';
+
+            popup.style.display = 'flex';
+            requestAnimationFrame(() => {
+                popup.classList.add('show');
+            });
+        }
+
+        if (popup.classList.contains('show')) {
+            popup.classList.remove('show');
+            setTimeout(() => {
+                popup.style.display = 'none';
+                updateAndShowPopup();
+            }, 300); // chờ animation ẩn xong
+        } else {
+            updateAndShowPopup();
+        }
     });
+
     document.getElementById("btn_back").addEventListener("click", () => {
-        document.getElementById("station_detail").style.display = 'none';
+        // document.getElementById("station_detail").style.display = 'none';
+        popup.classList.remove('show');
+        setTimeout(() => {
+            popup.style.display = 'none';
+        }, 300); // chờ animation kết thúc
     });
     marker.addTo(map);
     return marker;
