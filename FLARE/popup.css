@@ -1,0 +1,85 @@
+.popup{
+    position: absolute;
+    display : none;
+    flex-direction: column;
+    width: 20%;
+    height: 550px;
+    top: 10%;
+    left: 77%;
+    border-radius: 15px;
+    padding: 20px 15px;
+    background-color: white;
+    z-index: 999; 
+    box-sizing: border-box;
+}
+#btn_back{
+    width: 30px;
+    height: auto;
+    cursor: pointer;
+}
+#type {
+    height: 30px;
+    width: 100px;
+    margin-left: auto;
+    background-color: red;
+    border-style: solid;
+    border-color: red;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+}
+#camera{
+    width: 33px;
+    height: auto;
+    margin-right: 7px;
+}
+#drone{
+    width: 35px;
+    height: auto;
+    margin-right: 7px;
+}
+#pi{
+    width: 30px;
+    height: auto;
+    margin-right: 7px;
+}
+#box_container {
+    flex-grow: 1;
+    margin-top: 5px;            
+    display: flex;     
+    flex-direction: column;          
+    justify-content: space-between; 
+    gap: 10px;                  
+    overflow: auto;
+}
+
+.info-box {
+    flex: 33%;    
+    padding-top: 5px;
+    padding-left: 10px;                 
+    border: 1px solid #000;    
+    border-radius: 15px;
+}
+
+.info-header{
+    display: flex;
+    flex-direction: row;
+    font-size: medium;
+    font-weight: 600;
+    font-size: medium;
+    align-items: center;
+}
+.info{
+    display: flex;
+    flex-direction: row;
+    margin-top: 3px;
+}
+.state{
+    margin-right: 10px;
+}
+.battery{
+    margin-right: 10px;
+}
+.timestamp{
+    margin-right: 10px;
+}

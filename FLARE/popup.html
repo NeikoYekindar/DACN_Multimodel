@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="popup.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div class="popup" id="station_detail">
+        <img src='./assets/back.png' id="btn_back">
+        <h2 class>Station 1</h2>
+        <p>Phường Linh Trung, Thủ Đức, Hồ Chí Minh, Việt Nam.</p>
+        <p id="type">Flood risk</p>
+        <div id="box_container">
+
+            <div class="info-box">
+                <div class="info-header">
+                    <img src="./assets/camera.png" id="camera">
+                    <p>Camera</p>
+                </div>
+                <div class="info-content">
+                    <div class="info">
+                        <p class="state">State: </p>
+                        <p>Up</p>
+                    </div>
+                    <div class="info">
+                        <p class="timestamp">Time stamp:</p>
+                        <p>2025-04-15 9:15:53</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-header">
+                    <img src="./assets/drone.png" id="drone">
+                    <p>Drone</p>
+                </div>
+                <div class="info-content">
+                    <div class="info">
+                        <p class="state">State: </p>
+                        <p>Up</p>
+                    </div>
+                    <div class="info">
+                        <p class="battery">Battery: </p>
+                        <p>87%</p>
+                    </div>
+                    <div class="info">
+                        <p class="timestamp">Time stamp: </p>
+                        <p>2025-04-15 9:15:53</p>
+                    </div>
+                </div>
+            </div>
+            <div class="info-box">
+                <div class="info-header">
+                    <img src="./assets/pi.png" id="pi">
+                    <p>Raspberry Pi</p>
+                </div>
+                <div class="info-content">
+                    <div class="info">
+                        <p class="state">State: </p>
+                        <p>Up</p>
+                    </div>
+                    <div class="info">
+                        <p class="timestamp">Time stamp: </p>
+                        <p>2025-04-15 9:15:53</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-wrapper" id="main-content">
+
+    </div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.1/mapbox-gl.js"></script>
+    <script>
+        const container = document.getElementById("main-content")
+        container.innerHTML = `
+            <main class="main">
+                <div id="map_2" class="map-full"></div>
+            </main>`;
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoidGhpZW5waGF0MDgxMCIsImEiOiJjbTJzc3hrdzcwMTIwMm5weHliM2x1bXE0In0.-VE5I0KN9VglmKTWSxG97g';
+        const map = new mapboxgl.Map({
+            container: 'map_2',
+            style: 'mapbox://styles/mapbox/standard',
+            center: [106.8007, 10.8752],
+            zoom: 15,
+            pitch: 60,
+            bearing: -20,
+            antialias: true,
+            projection: 'globe'
+        });
+        map.on('load', () => {
+            const marker = new mapboxgl.Marker()
+                .setLngLat([106.8007, 10.8752])
+                .addTo(map);
+
+            marker.getElement().addEventListener('click', () => {
+                const popup = document.getElementById("station_detail");
+                popup.style.display = 'flex';
+            });
+        });
+        document.getElementById("btn_back").addEventListener("click", () => {
+            document.getElementById("station_detail").style.display = 'none';
+        });
+
+    </script>
+
+</body>
+
+</html>

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flare Map Fullscreen</title>
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet">
   <style>
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -33,6 +35,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div id="map"></div>
@@ -40,7 +43,7 @@
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
   <script type="module">
-    import { enable3D } from './mapbox3d.js';
+    import { enable3D, addMarker } from './mapbox3d.js';
 
     mapboxgl.accessToken = 'pk.eyJ1IjoidGhpZW5waGF0MDgxMCIsImEiOiJjbTJzc3hrdzcwMTIwMm5weHliM2x1bXE0In0.-VE5I0KN9VglmKTWSxG97g';
 
@@ -53,4 +56,5 @@
     map.addControl(new mapboxgl.NavigationControl());
   </script>
 </body>
+
 </html>
