@@ -65,7 +65,7 @@ function loadView(view) {
             <div id = "map_2" class = "map-full"></div>
              <div class="popup" id="station_detail">
         <img src='./assets/back.png' id="btn_back">
-        <h2 class>Station 1</h2>
+        <h2 id="station_name">Station 1</h2>
         <p>Phường Linh Trung, Thủ Đức, Hồ Chí Minh, Việt Nam.</p>
         <p id="type">Flood risk</p>
         <div id="box_container">
@@ -179,6 +179,7 @@ function initFullMap() {
             const locations = [
                 {
                     popup: 'Nhà văn hóa sinh viên',
+                    name: "Station 1",
                     longitude: 106.80131197919498,
                     latitude: 10.875352088818252,
                     station_data: {
@@ -194,6 +195,7 @@ function initFullMap() {
                 },
                 {
                     popup: 'Cổng A - Trường Đại học Công nghệ thông tin',
+                    name: "Station 2",
                     longitude: 106.80212737116507,
                     latitude: 10.870716148648393,
                     station_data: {
@@ -209,6 +211,7 @@ function initFullMap() {
                 },
                 {
                     popup: 'Ktx Khu B - ĐHQG',
+                    name: "Station 3",
                     longitude: 106.78378106209817,
                     latitude: 10.88222157674423,
                     station_data: {
@@ -223,7 +226,8 @@ function initFullMap() {
                     }
                 },
                 {
-                    popup: 'Trường Đại học KHXH&NV  ',
+                    popup: 'Trường Đại học KHXH&NV',
+                    name: "Station 4",
                     longitude: 106.80227757476617,
                     latitude: 10.872275518446761,
                     station_data: {
@@ -245,6 +249,7 @@ function initFullMap() {
 
                 const mark = m.addMarker(
                     map,
+                    element.name,
                     element.popup,
                     element.longitude,
                     element.latitude,

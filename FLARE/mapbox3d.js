@@ -32,7 +32,7 @@ function enable3D(map) {
 }
 
 //Thêm marker vào mapmap
-function addMarker(map, popupHtml = '', longitude, latitude, { camera_state, drone_state, pi_state, camera_timestamp, drone_timestamp, pi_timestamp, battery_drone, warning }) {
+function addMarker(map, name, popupHtml = '', longitude, latitude, { camera_state, drone_state, pi_state, camera_timestamp, drone_timestamp, pi_timestamp, battery_drone, warning }) {
 
     const customIcon = document.createElement('div');
     customIcon.className = 'custom-marker';
@@ -54,6 +54,8 @@ function addMarker(map, popupHtml = '', longitude, latitude, { camera_state, dro
     marker.getElement().addEventListener('click', () => {
 
         const updateAndShowPopup = () => {
+            const popup_station_name = document.getElementById('station_name');
+
             const popupCameraState = document.getElementById('state_camera');
             const popupDroneState = document.getElementById('state_drone');
             const popupPiState = document.getElementById('state_pi');
@@ -63,6 +65,7 @@ function addMarker(map, popupHtml = '', longitude, latitude, { camera_state, dro
             const popupPiBattery = document.getElementById('battery_drone');
             const popupType = document.getElementById('type');
 
+            popup_station_name.innerHTML = name;
             popupCameraState.innerHTML = camera_state;
             popupDroneState.innerHTML = drone_state;
             popupPiState.innerHTML = pi_state;
