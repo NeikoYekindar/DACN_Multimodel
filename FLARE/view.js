@@ -258,6 +258,8 @@ function initFullMap() {
             });
         });
     });
+}
 
+function loadView() {
 
 }
