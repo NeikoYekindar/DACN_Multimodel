@@ -11,7 +11,17 @@
     background-color: white;
     z-index: 999; 
     box-sizing: border-box;
+
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
+.popup.show {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+}
+
 #btn_back{
     width: 30px;
     height: auto;

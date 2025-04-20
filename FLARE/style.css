@@ -8,6 +8,7 @@ body{
     font-family: "Segoe UI", sans-serif;
     background: #f5f5f5;
     color: #111;
+    overflow: hidden;
 }
 
 .container{
@@ -25,6 +26,7 @@ body{
     display:  flex;
     flex-direction: column;
     padding: 20px 0;
+    overflow: hidden;
 }
 
 .logo{
@@ -48,7 +50,32 @@ body{
 
 .main{
     flex: 1;
-    padding:20px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+    overflow: hidden; 
+   
+}
+.main_scroll{
+    flex: 1;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y:auto; 
+    overflow-x:hidden;
+    scroll-behavior:smooth;     
+    padding: 20px;
+    box-sizing: border-box;   
+    border-radius: 18px; 
+    /* border-radius: 18px;
+    margin-bottom: 20px;
+    margin-right: 20px; */
+}
+.main_2{
+    flex: 1;
+
     background-color: #fff;
     display: flex;
     flex-direction: column;
@@ -81,21 +108,24 @@ body{
 .map-full {
     width: 100%;
     height: 100%;
+    border-radius: 18px;
   }
   
-  .map-label {
+  /* .map-label {
     position: absolute;
     bottom: 10px;
     right: 10px;
     background-color: #2b2b2b;
     color: white;
-    font-size: 0.8rem;
+    font-size: 14px;
+    font-weight: 600;
     padding: 4px 10px;
     border-radius: 5px;
     cursor: pointer;
     z-index: 10;
+    font-family: "Segoe UI", sans-serif;
    
-}
+} */
   
   .map-box {
     flex: 2;
@@ -103,7 +133,7 @@ body{
 }
   #map {
     width: 100%;
-    height: 200px;
+    height: 220px;
     border-radius: 8px;
   }
   
@@ -119,19 +149,22 @@ body{
     position: absolute;
     right: 1px;
     bottom: 15px;
-    font-size: 0.9rem;
+    font-size: 14px;
     color: rgb(0, 0, 0);
     padding: 3px 8px;
     border-radius: 20px;
     padding: 10px 40px;
     border: 1px solid black;
     background: white;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
- 
+    font-family: "Segoe UI", sans-serif;
     transition: 0.2s;
 
 }
+.map-label:hover {
+    background: #f0f0f0;
+  }
 .status-box{
     flex: 1;
     border: 1px solid #ccc;
@@ -163,16 +196,23 @@ body{
 
 .bottom-box{
     flex:1;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     border-radius: 8px;
     /* min-height: 100px; */
-    height: 100px;
-    background-color: #fafafa;
+    /* height: auto; */
+    background-color: #ffffff;
+    /* padding: 24px; */
+    box-sizing:border-box;
+
+
 }
 .status-title{
     text-align: center;
     font-weight: 600;
     margin-bottom: 20px;
+    font-family: "Segoe UI", sans-serif;
+
+
 }
 
 .status-grid {
@@ -201,16 +241,19 @@ body{
     font-size: 1.1rem;
     font-weight: 400;
     margin-bottom: 4px;
+    padding-left: 4px;
+
   }
 .status-item img {
     width: 24px;
     height: 24px;
     /* margin-bottom: 4px; */
-    align-items: flex-start;
+    object-fit: contain; 
+
   }
 .status-count {
     font-size: 1.4rem;
-    font-weight: bold;
+    font-weight: medium;
     /* margin-left: -40px;  */
     margin-left: 30px
 }
@@ -222,10 +265,11 @@ body{
     background: white;
     border-radius: 30px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 14px;
     transition: 0.2s;
     margin-top: 40px;
-    font-size: 0.9rem;
+    font-family: "Segoe UI", sans-serif;
 
   }
   .btn-detail:hover {
@@ -239,7 +283,7 @@ body{
     align-items: center;      
     padding: 0 70px;            
     
-  }
+  } 
 
   .topbar-title {
     font-size: 1.4rem;
@@ -254,4 +298,51 @@ body{
     background-color: #001F2B; 
     display: flex;
     align-items: stretch;
+    overflow: hidden;
+    padding: 20px; 
+    box-sizing: border-box;
+
+  }
+
+
+
+  .charts-row{
+    display:flex;
+    gap:24px;
+    margin-bottom:24px;   /* khoảng cách giữa hai hàng */
+  }
+  .chart-box{
+    flex:1;               /* mỗi hộp rộng bằng nhau */
+    height:270px;         /* bạn chỉnh bao nhiêu tùy thích */
+    display:flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    /* align-items:center;    */
+    /* justify-content:center; */
+    border: 1px solid #ccc;
+    padding: 12px 16px 30px 16px;
+    border-radius: 8px;
+    position: relative;
+
+    /* padding-top: 60px; */
+    
+
+  }
+  .chart-box canvas{
+    width:100% !important;
+    height:100% !important;
+  }
+  .chart-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 4px;
+    align-self: flex-start;
+  }
+  @media(max-width:900px){
+    .charts-row{
+      flex-direction:column;
+    }
+    .chart-box{height:200px;}
   }

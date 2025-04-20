@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="popup.css" />
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet">
-
 </head>
 
 <body>
@@ -19,18 +18,28 @@
         <aside class="sidebar">
             <!-- <div class="logo">FLare</div> -->
             <nav class="nav">
-                <a href="#" class="active" onclick="loadView('home')">Home</a>
-                <a href="#" onclick="loadView('map')">Map</a>
+                <a href="#" data-view="home" class="active" onclick="loadView('home')">Home</a>
+                <a href="#"  data-view="map" onclick="loadView('map')">Map</a>
                 <a href="#">Data</a>
             </nav>
         </aside>
-        <div class="main-wrapper" id="main-content"></div>
+        <div class="main-wrapper" id="main-content">
+            
+        </div>
 
     </div>
 
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.1/mapbox-gl.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script type="module" src="mapbox3d.js"></script>
+    <script type="module">
+        import { initCharts } from './chart.js';
+        // Gán ra global cho view.js (vì view.js không phải module):
+        window.initCharts = initCharts;
+      </script>
     <script src="view.js"></script>
+   
+
 </body>
 
 </html>

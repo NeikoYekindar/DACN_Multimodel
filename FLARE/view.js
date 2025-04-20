@@ -5,58 +5,78 @@ function loadView(view) {
     if (view === "home") {
         container.innerHTML = `
                 <main class="main">
-                    <h2 class="section-title">Overview</h2>
-                <div class="overview">
-                    <div class="map-box">
-                        <div id="map" class="mapbox"></div>
-                        <button class="map-label" onclick="loadView('map')">Full view</button>
-                    </div>
-                    <div class="status-box">
-                        <h3 class="status-title">Operational Overview</h3>
-                        <div class="status-grid">
-                            <!-- Cột trái -->
-                            <div class="status-item">
-                                <div class="status-label">
-                                    <img src="assets/camera.png" />
-                                    <span>Camera Online</span>
-                                </div>
-                                <div class="status-count">5</div>
+                    <main class ="main_scroll">
+                        <h2 class="section-title">Overview</h2>
+                        <div class="overview">
+                            <div class="map-box">
+                                <div id="map" class="mapbox"></div>
+                                <button class="map-label" onclick="loadView('map')">Full view</button>
                             </div>
-                            <!-- Cột phải -->
-                            <div class="status-item">
-                                <div class="status-label">
-                                    <img src="assets/red.png" />
-                                    <span>Red Zone</span>
+                            <div class="status-box">
+                                <h3 class="status-title">Operational Overview</h3>
+                                <div class="status-grid">
+                                    <!-- Cột trái -->
+                                    <div class="status-item">
+                                        <div class="status-label">
+                                            <img src="assets/camera.png" />
+                                            <span>Camera Online</span>
+                                        </div>
+                                        <div class="status-count">5</div>
+                                    </div>
+                                    <!-- Cột phải -->
+                                    <div class="status-item">
+                                        <div class="status-label">
+                                            <img src="assets/red.png"/>
+                                            <span>Red Zone</span>
+                                        </div>
+                                        <div class="status-count">3</div>
+                                    </div>
+                                    <!-- Cột trái dòng 2 -->
+                                    <div class="status-item">
+                                        <div class="status-label">
+                                            <img src="assets/drone.png" />
+                                            <span>Drone Online</span>
+                                        </div>
+                                    
+                                    <div class="status-count">0</div>
+                                    </div>
+                                    <!-- Cột phải dòng 2 -->
+                                    <div class="status-item">
+                                        <div class="status-label">
+                                            <img src="assets/green.png" />
+                                            <span>Green Zone</span>
+                                        </div>
+                                    <div class="status-count">2</div>
+                                    </div>
                                 </div>
-                                <div class="status-count">3</div>
-                            </div>
-                            <!-- Cột trái dòng 2 -->
-                            <div class="status-item">
-                                <div class="status-label">
-                                    <img src="assets/drone.png" />
-                                    <span>Drone Online</span>
-                                </div>
-                              
-                              <div class="status-count">0</div>
-                            </div>
-                            <!-- Cột phải dòng 2 -->
-                            <div class="status-item">
-                                <div class="status-label">
-                                    <img src="assets/green.png" />
-                                    <span>Green Zone</span>
-                                </div>
-                              <div class="status-count">2</div>
+                                <button class="btn-detail">Detail</button> 
                             </div>
                         </div>
-                        <button class="btn-detail">Detail</button> 
-                    </div>
-                </div>
-                <div class="bottom-box">
-                    <!-- Nội dung biểu đồ hoặc log -->
-                </div>
+                        <div class="bottom-box">
+                            <div class="charts-row">
+                                <div class="chart-box" id="box-water">
+                                <div class="chart-title">Total Reports</div>
+                                    <canvas id="chartWater"></canvas>
+                                </div>
+                            </div>
+                            <div class="charts-row">
+                                <div class="chart-box" id="box-zone1">
+                                    <div class="chart-title">Zone Distribution</div>
+                                    <canvas id="chartZone1"></canvas>
+                                </div>
+                                <div class="chart-box" id="box-alert-type">
+                                    <div class="chart-title">Alert by Device</div>
+                                    <canvas id="chartAlertType"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
                 </main>
         `;
-        initMiniMap();
+        setTimeout(() => {
+            initMiniMap();
+            initCharts();
+        }, 0);
 
     }
     if (view === "map") {
@@ -65,7 +85,7 @@ function loadView(view) {
             <div id = "map_2" class = "map-full"></div>
              <div class="popup" id="station_detail">
         <img src='./assets/back.png' id="btn_back">
-        <h2 class>Station 1</h2>
+        <h2 id="station_name">Station 1</h2>
         <p>Phường Linh Trung, Thủ Đức, Hồ Chí Minh, Việt Nam.</p>
         <p id="type">Flood risk</p>
         <div id="box_container">
@@ -78,11 +98,11 @@ function loadView(view) {
                 <div class="info-content">
                     <div class="info">
                         <p class="state">State: </p>
-                        <p>Up</p>
+                        <p id="state_camera">Up</p>
                     </div>
                     <div class="info">
                         <p class="timestamp">Time stamp:</p>
-                        <p>2025-04-15 9:15:53</p>
+                        <p id="timestamp_camera">2025-04-15 9:15:53</p>
                     </div>
                 </div>
             </div>
@@ -95,15 +115,15 @@ function loadView(view) {
                 <div class="info-content">
                     <div class="info">
                         <p class="state">State: </p>
-                        <p>Up</p>
+                        <p id="state_drone">Up</p>
                     </div>
                     <div class="info">
                         <p class="battery">Battery: </p>
-                        <p>87%</p>
+                        <p id="battery_drone">87%</p>
                     </div>
                     <div class="info">
                         <p class="timestamp">Time stamp: </p>
-                        <p>2025-04-15 9:15:53</p>
+                        <p id="timestamp_drone">2025-04-15 9:15:53</p>
                     </div>
                 </div>
             </div>
@@ -115,19 +135,15 @@ function loadView(view) {
                 <div class="info-content">
                     <div class="info">
                         <p class="state">State: </p>
-                        <p>Up</p>
+                        <p id="state_pi">Up</p>
                     </div>
                     <div class="info">
                         <p class="timestamp">Time stamp: </p>
-                        <p>2025-04-15 9:15:53</p>
+                        <p id="timestamp_pi">2025-04-15 9:15:53</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="main-wrapper" id="main-content">
-
     </div>
         </main>
         `;
@@ -136,7 +152,10 @@ function loadView(view) {
 
     document.querySelectorAll('.nav a').forEach(a => a.classList.remove("active"));
     document.querySelectorAll('.nav a').forEach(a => {
-        if (a.textContent.toLowerCase() === view) a.classList.add("active");
+        if (a.getAttribute('onclick')?.includes(`loadView('${view}')`)) {
+            a.classList.add("active");
+        }
+
     });
 }
 
@@ -156,10 +175,94 @@ function initMiniMap() {
         antialias: true,
         projection: 'globe'
     });
-    new mapboxgl.Marker()
-        .setLngLat([106.8007, 10.8752])
-        .setPopup(new mapboxgl.Popup().setHTML("<strong>Làng</strong>"))
-        .addTo(map);
+    map.on('load', () => {
+        import('./mapbox3dmini.js').then(m => {
+            const { addMiniMapMarker, addCircleLayer } = m;
+
+            const locations = [
+                {
+                    popup: 'Nhà văn hóa sinh viên',
+                    name: "Station 1",
+                    longitude: 106.80131197919498,
+                    latitude: 10.875352088818252,
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Up",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-19 9:15:53",
+                        drone_timestamp: "2025-04-19 9:15:53",
+                        pi_timestamp: "2025-04-19 9:15:53",
+                        battery_drone: "66%",
+                        warning: 1,
+                    }
+                },
+                {
+                    popup: 'Cổng A - Trường Đại học Công nghệ thông tin',
+                    name: "Station 2",
+                    longitude: 106.80212737116507,
+                    latitude: 10.870716148648393,
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Down",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-18 9:15:53",
+                        drone_timestamp: "2025-04-18 9:15:53",
+                        pi_timestamp: "2025-04-18 9:15:53",
+                        battery_drone: "41%",
+                        warning: 0,
+                    }
+                },
+                {
+                    popup: 'Ktx Khu B - ĐHQG',
+                    name: "Station 3",
+                    longitude: 106.78378106209817,
+                    latitude: 10.88222157674423,
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Up",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-20 9:15:53",
+                        drone_timestamp: "2025-04-20 9:15:53",
+                        pi_timestamp: "2025-04-20 9:15:53",
+                        battery_drone: "89%",
+                        warning: 0,
+                    }
+                },
+                {
+                    popup: 'Trường Đại học KHXH&NV',
+                    name: "Station 4",
+                    longitude: 106.80227757476617,
+                    latitude: 10.872275518446761,
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Down",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-16 9:15:53",
+                        drone_timestamp: "2025-04-16 9:15:53",
+                        pi_timestamp: "2025-04-16 9:15:53",
+                        battery_drone: "67%",
+                        warning: 1,
+                    }
+                },
+            ];
+
+            locations.forEach((loc, index) => {
+                const center = [loc.longitude, loc.latitude];
+                addCircleLayer(map, center, loc.station_data.warning, index);
+
+                const icon = loc.station_data.warning
+                    ? './assets/drone.png'
+                    : './assets/camera.png';
+
+                addMiniMapMarker(map, loc, index, icon);
+            });
+        });
+    });
+
+
+
+
+
 }
 
 function initFullMap() {
@@ -176,51 +279,86 @@ function initFullMap() {
     });
     map.on('load', () => {
         import('./mapbox3d.js').then(m => {
-            // Kích hoạt 3D
-            // m.enable3D(map);
-
-            // Thêm marker
-
             const locations = [
                 {
                     popup: 'Nhà văn hóa sinh viên',
+                    name: "Station 1",
                     longitude: 106.80131197919498,
                     latitude: 10.875352088818252,
-                    type: '1'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Up",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-19 9:15:53",
+                        drone_timestamp: "2025-04-19 9:15:53",
+                        pi_timestamp: "2025-04-19 9:15:53",
+                        battery_drone: "66%",
+                        warning: 1,
+                    }
                 },
                 {
                     popup: 'Cổng A - Trường Đại học Công nghệ thông tin',
+                    name: "Station 2",
                     longitude: 106.80212737116507,
                     latitude: 10.870716148648393,
-                    type: '0'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Down",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-18 9:15:53",
+                        drone_timestamp: "2025-04-18 9:15:53",
+                        pi_timestamp: "2025-04-18 9:15:53",
+                        battery_drone: "41%",
+                        warning: 0,
+                    }
                 },
                 {
                     popup: 'Ktx Khu B - ĐHQG',
+                    name: "Station 3",
                     longitude: 106.78378106209817,
                     latitude: 10.88222157674423,
-                    type: '1'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Up",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-20 9:15:53",
+                        drone_timestamp: "2025-04-20 9:15:53",
+                        pi_timestamp: "2025-04-20 9:15:53",
+                        battery_drone: "89%",
+                        warning: 0,
+                    }
                 },
                 {
-                    popup: 'Trường Đại học KHXH&NV  ',
+                    popup: 'Trường Đại học KHXH&NV',
+                    name: "Station 4",
                     longitude: 106.80227757476617,
                     latitude: 10.872275518446761,
-                    type: '0'
+                    station_data: {
+                        camera_state: "Up",
+                        drone_state: "Down",
+                        pi_state: "Up",
+                        camera_timestamp: "2025-04-16 9:15:53",
+                        drone_timestamp: "2025-04-16 9:15:53",
+                        pi_timestamp: "2025-04-16 9:15:53",
+                        battery_drone: "67%",
+                        warning: 1,
+                    }
                 },
             ]
 
             locations.forEach((element, index) => {
                 var center = [element.longitude, element.latitude];
-                m.addCircleLayer(map, center, element.type, index);
+                m.addCircleLayer(map, center, element.station_data.warning, index);
 
                 const mark = m.addMarker(
                     map,
+                    element.name,
                     element.popup,
                     element.longitude,
                     element.latitude,
+                    element.station_data
                 );
             });
         });
     });
-
-
 }
