@@ -1,0 +1,3 @@
+Server/node_modules/
+emqx/__pycache__/
+Multimodel/__pycache__
