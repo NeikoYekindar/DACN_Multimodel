@@ -36,12 +36,23 @@ class WeightedFusion:
 
     def calculate_weights(self, delta_camera, delta_drone):
        
-        w_camera_prime = 1 / (1+delta_camera)
-        w_drone_prime = 1 / (1+delta_drone)
+        # w_camera_prime = 1 / (1+delta_camera)
+        # w_drone_prime = 1 / (1+delta_drone)
         
-        w_camera = w_camera_prime / (w_camera_prime + w_drone_prime)
-        w_drone = w_drone_prime / (w_camera_prime + w_drone_prime)
+        # w_camera = w_camera_prime / (w_camera_prime + w_drone_prime)
+        # w_drone = w_drone_prime / (w_camera_prime + w_drone_prime)
         
+        # return w_camera, w_drone
+            # Thêm epsilon để tránh chia 0 nếu delta bằng 0
+        epsilon = 1e-6
+        w_camera_prime = delta_camera + epsilon
+        w_drone_prime = delta_drone + epsilon
+
+        # Chuẩn hóa thành tổng = 1
+        total = w_camera_prime + w_drone_prime
+        w_camera = w_camera_prime / total
+        w_drone = w_drone_prime / total
+
         return w_camera, w_drone
     
     def extract_features(self, camera_image, drone_image, camera_model, drone_model):

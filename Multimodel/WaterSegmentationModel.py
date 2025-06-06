@@ -21,8 +21,8 @@ class WaterSegmentationModel:
 
 
         # Tham chiếu diện tích an toàn (có thể điều chỉnh)
-        self.reference_camera_area = 214139    # Diện tích mặc định, sẽ được cập nhật 214139 
-        self.reference_drone_area = 114114 # Diện tích mặc định, sẽ được cập nhật 114114
+        self.reference_camera_area = 97833    # Diện tích mặc định, sẽ được cập nhật 214139 
+        self.reference_drone_area = 249394 # Diện tích mặc định, sẽ được cập nhật 114114
 
 
 
@@ -60,11 +60,13 @@ class WaterSegmentationModel:
                 # Tìm vùng nước trong các đối tượng được phát hiện
                 for i, box in enumerate(boxes):
                     # Giả định rằng lớp 0 là nước 
-                    if box[5].item() == 0:  # class_id = 0 cho nước
-                        if water_mask is None:
-                            water_mask = masks[i].cpu().numpy()
-                        else:
-                            water_mask = np.logical_or(water_mask, masks[i].cpu().numpy())
+                    # if box[5].item() == 0:  # class_id = 0 cho nước
+                    class_id = int(box[5])  # class_id = box[5]
+                    if class_id == 0:  # Chỉ lấy vùng có nhãn là "water"
+                            if water_mask is None:
+                                water_mask = masks[i].cpu().numpy()
+                            else:
+                                water_mask = np.logical_or(water_mask, masks[i].cpu().numpy())
         # Nếu không tìm thấy vùng nước
         if water_mask is None:
             water_mask = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
@@ -73,8 +75,55 @@ class WaterSegmentationModel:
         else:
             water_mask = water_mask.astype(np.uint8) * 255
             water_area = np.sum(water_mask > 0)
-            water_percentage = (water_area / (image.shape[0] * image.shape[1])) * 100
+            total_area = image.shape[0] * image.shape[1]
+            water_percentage = (water_area / total_area) * 100
         return water_mask, water_area, water_percentage
+    
+    def segment_water_drone(self, image, is_drone = False):
+        """
+            Phân đoạn vùng nước từ hình ảnh sử dụng YOLOv11n-seg
+        Args:
+            image: Hình ảnh đầu vào
+            is_drone: True nếu hình ảnh từ drone, False nếu từ camera
+        
+        Returns:
+            water_mask: Mặt nạ vùng nước
+            water_area: Diện tích vùng nước
+            water_percentage: Phần trăm vùng nước trong hình ảnh
+        """
+        model = self.drone_model if is_drone else self.camera_model
+        results = model(image, verbose=False)
+        #Xử lý kết quả phân đoạn
+        water_mask = None
+        for r in results:
+            if hasattr(r, 'masks') and r.masks is not None:
+                masks = r.masks.data
+                boxes = r.boxes.data
+
+
+                # Tìm vùng nước trong các đối tượng được phát hiện
+                for i, box in enumerate(boxes):
+                    # Giả định rằng lớp 0 là nước 
+                    # if box[5].item() == 0:  # class_id = 0 cho nước
+                    class_id = int(box[5])  # class_id = box[5]
+                    if class_id == 1:  # Chỉ lấy vùng có nhãn là "water"
+                            if water_mask is None:
+                                water_mask = masks[i].cpu().numpy()
+                            else:
+                                water_mask = np.logical_or(water_mask, masks[i].cpu().numpy())
+        # Nếu không tìm thấy vùng nước
+        if water_mask is None:
+            water_mask = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
+            water_area = 0
+            water_percentage = 0
+        else:
+            water_mask = water_mask.astype(np.uint8) * 255
+            water_area = np.sum(water_mask > 0)
+            total_area = image.shape[0] * image.shape[1]
+            water_percentage = (water_area / total_area) * 100
+        return water_mask, water_area, water_percentage
+
+
 
 
     def calculate_area_change(self, camera_area, drone_area):
@@ -92,6 +141,6 @@ class WaterSegmentationModel:
 
         # chuyển đổi sang giá trị tuyệt đối để tính trọng só
         # tránh trường hợp chia cho 0
-        delta_camera_abs = abs(delta_camera)
-        delta_drone_abs = abs(delta_drone)
-        return delta_camera_abs, delta_drone_abs
+        # delta_camera_abs = abs(delta_camera)
+        # delta_drone_abs = abs(delta_drone)
+        return delta_camera, delta_drone
